@@ -74,8 +74,6 @@ def draw_kps(img, kp, mrksize, clr=None):
             {'name':'0_1','color':cm(31),'bodypart':(0,1)},
             {'name':'2_4','color':cm(29), 'bodypart':(2,4)},
             {'name':'1_3','color':cm(33),'bodypart':(1,3)},
-            #{'name':'0_4','color':cm(29), 'bodypart':(0,4)},
-            #{'name':'0_3','color':cm(33),'bodypart':(0,3)},
             {'name':'6_8','color':cm(5),'bodypart':(6,8)},
             {'name':'5_7','color':cm(10),'bodypart':(5,7)},
             {'name':'8_10','color':cm(7),'bodypart':(8,10)},
@@ -84,17 +82,21 @@ def draw_kps(img, kp, mrksize, clr=None):
             {'name':'11_13','color':cm(22),'bodypart':(11,13)},
             {'name':'14_16','color':cm(18),'bodypart':(14,16)},
             {'name':'13_15','color':cm(24),'bodypart':(13,15)},
-            {'name':'18_17','color':cm(1),'bodypart':(18,17)},
-            {'name':'0_18','color':cm(1),'bodypart':(0,18)},
-            {'name':'18_6','color':cm(2),'bodypart':(18,6)},
-            {'name':'18_5','color':cm(3),'bodypart':(18,5)},
+            {'name':'0_17','color':cm(1),'bodypart':(0,17)},
+            {'name':'17_6','color':cm(2),'bodypart':(17,6)},
+            {'name':'17_5','color':cm(3),'bodypart':(17,5)},
             {'name':'17_12','color':cm(14),'bodypart':(17,12)},
             {'name':'17_11','color':cm(20),'bodypart':(17,11)}
             ]
 
-    kp_clr = [cm(0), cm(32), cm(28), cm(34), cm(30), cm(9), cm(4), cm(11), cm(6), 
-              cm(13), cm(8), cm(21), cm(15), cm(23), cm(17), cm(25), cm(19), cm(1), cm(1)] 
+    # キーポイントの数に応じて色を動的に生成
+    n_kp = len(kp)
+    kp_clr = [cm(i % 36) for i in range(n_kp)]
 
+    if (n_kp > 19):
+        kp_con.append({'name':'18_17','color':cm(1),'bodypart':(18,17)})
+        if (n_kp > 20):
+            kp_con.append({'name':'18_19','color':cm(1),'bodypart':(18,19)})
     for i in reversed(range(len(kp))):
         if kp[i] is not None:
             c = kp_clr[i]
@@ -102,13 +104,12 @@ def draw_kps(img, kp, mrksize, clr=None):
                 cv2.circle(img, (int(kp[i][0]), int(kp[i][1])), mrksize, (c[0]*255, c[1]*255, c[2]*255), thickness=-1)
             else:
                 cv2.circle(img, (int(kp[i][0]), int(kp[i][1])), mrksize, (clr[0]*255, clr[1]*255, clr[2]*255), thickness=-1)
-            #ax.plot(kp[i][0], kp[i][1], color=kp_clr[i], marker='o', ms=8*mrksize, alpha=1, markeredgewidth=0)
     
     for i in reversed(range(len(kp_con))):
         j1 = kp_con[i]['bodypart'][0]
         j2 = kp_con[i]['bodypart'][1]
         c = kp_con[i]['color']
-        if kp[j1] is not None and kp[j2] is not None:
+        if j1 < len(kp) and j2 < len(kp) and kp[j1] is not None and kp[j2] is not None:
             if clr is None:
                 ellipse_line(img, kp[j1], kp[j2], mrksize, (c[0]*255, c[1]*255, c[2]*255))
             else:
@@ -203,7 +204,7 @@ def procSingleVideo(config_path, data_name, raw_data_dir,result_dir,vidout_dir,
             I = np.logical_not(x[:,0]==0)
             I = np.logical_and(I, s>0.0)
             p = np.concatenate([p, I[:,np.newaxis]], axis=1)
-
+            
             kp = p.tolist()
             # mrksize = 5
             clean_kp(kp, ignore_score=ignore_score, show_as_possible=show_as_possible)
