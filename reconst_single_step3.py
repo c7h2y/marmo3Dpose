@@ -379,4 +379,5 @@ if __name__ == '__main__':
         config_3d_toml=args.config_3d_toml
         calib_3d_toml=args.calib_3d_toml
         
-    proc(data_name,results_dir_root, config_path, n_kp,redo,config_3d_toml=config_3d_toml,calib_3d_toml=calib_3d_toml)   
+    proc(data_name,results_dir_root, config_path, n_kp,redo,config_3d_toml=config_3d_toml,calib_3d_toml=calib_3d_toml)
+    
