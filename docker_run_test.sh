@@ -1,6 +1,8 @@
 #!/bin/bash
 source /opt/miniconda3/etc/profile.d/conda.sh
-
+export CUDA_HOME=/usr/local/cuda
+export PATH=$CUDA_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
 device_str="cuda:0"
 
 config_path='./calib/marmo_cj425m/config.yaml' 
@@ -89,7 +91,7 @@ for session in ${sessions[@]};do
                         --path_vid ${raw_data_dir}/${data_name}.${camName}/000000.mp4  \
                         --path_json ${label2d_output_dir}/${data_name}/${data_name}_${camName}_000000.json \
                         --path_output ${vid2dout_dir}/${data_name}_${camName}_000000.mp4 \
-                        --n_frame_to_save 10000
+                        --n_frame_to_save 100
         done
 
         # 3D Proc 
@@ -109,7 +111,7 @@ for session in ${sessions[@]};do
                 --data_name ${data_name} 
         
         i_cam=6
-        n_frame2draw=11000
+        n_frame2draw=100
         pickledata_dir=${results3d_dir}'/'$data_name
         python ./visualize_3D.py \
                 --config_path ${config_path}\
