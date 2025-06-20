@@ -16,6 +16,7 @@ calib_3d_toml='./calibration_tmpl.toml'
 config_3d_toml='./config_tmpl.toml'
 
 mkdir './results'
+mkdir './video'
 mkdir $label2d_dir
 mkdir $results3d_dir
 mkdir $video_dir
@@ -35,7 +36,7 @@ n_kp=20
 thr_kp_detection=0.5
 
 # procFrame=1000
-procFrame=-1
+procFrame=100
 
 # 2D Proc
 flgDo=0
@@ -83,29 +84,29 @@ for session in ${sessions[@]};do
                 --procFrame ${procFrame}
         flg=0
 
-        # for camName in ${camNames[@]};do
-        #         python ./visualize_2D.py  \
-        #                 --path_vid ${raw_data_dir}/${data_name}.${camName}/000000.mp4  \
-        #                 --path_json ${label2d_output_dir}/${data_name}/${data_name}_${camName}_000000.json \
-        #                 --path_output ${vid2dout_dir}/${data_name}_${camName}_000000.mp4 \
-        #                 --n_frame_to_save 11000
-        # done
+        for camName in ${camNames[@]};do
+                python ./visualize_2D.py  \
+                        --path_vid ${raw_data_dir}/${data_name}.${camName}/000000.mp4  \
+                        --path_json ${label2d_output_dir}/${data_name}/${data_name}_${camName}_000000.json \
+                        --path_output ${vid2dout_dir}/${data_name}_${camName}_000000.mp4 \
+                        --n_frame_to_save 10000
+        done
 
         # 3D Proc 
         t_intv='None'        
         # conda activate multicam2
-        # python ./process_3d.py \
-        #         --config_3d_toml ${config_3d_toml}\
-        #         --calib_3d_toml ${calib_3d_toml}\
-        #         --config_path ${config_path}\
-        #         --fps ${fps}\
-        #         --t_intv ${t_intv}\
-        #         --n_kp ${n_kp} \
-        #         --thr_kp_detection ${thr_kp_detection}\
-        #         --results3d_dir ${results3d_dir} \
-        #         --raw_data_dir ${raw_data_dir}\
-        #         --label2d_dir ${label2d_dir}\
-        #         --data_name ${data_name} 
+        python ./process_3d.py \
+                --config_3d_toml ${config_3d_toml}\
+                --calib_3d_toml ${calib_3d_toml}\
+                --config_path ${config_path}\
+                --fps ${fps}\
+                --t_intv ${t_intv}\
+                --n_kp ${n_kp} \
+                --thr_kp_detection ${thr_kp_detection}\
+                --results3d_dir ${results3d_dir} \
+                --raw_data_dir ${raw_data_dir}\
+                --label2d_dir ${label2d_dir}\
+                --data_name ${data_name} 
         
         i_cam=6
         n_frame2draw=11000
