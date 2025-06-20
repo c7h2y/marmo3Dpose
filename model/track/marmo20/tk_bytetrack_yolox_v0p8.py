@@ -27,7 +27,7 @@ model = dict(
         init_cfg=dict(
             type='Pretrained',
             checkpoint=  # noqa: E251
-            'weight/marmo19/detection.pth'  # noqa: E501
+            'weight/detection.pth'  # noqa: E501
         )),
     motion=dict(type='KalmanFilter'),
     tracker=dict(
