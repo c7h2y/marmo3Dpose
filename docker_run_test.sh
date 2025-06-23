@@ -18,7 +18,7 @@ calib_3d_toml='./calibration_tmpl.toml'
 config_3d_toml='./config_tmpl.toml'
 
 mkdir './results'
-mkdir './video'
+mkdir './results/video'
 mkdir $label2d_dir
 mkdir $results3d_dir
 mkdir $video_dir
@@ -95,7 +95,7 @@ for session in ${sessions[@]};do
         done
 
         # 3D Proc 
-        t_intv='None'        
+        t_intv="0,3"        
         # conda activate multicam2
         python ./process_3d.py \
                 --config_3d_toml ${config_3d_toml}\
@@ -111,7 +111,7 @@ for session in ${sessions[@]};do
                 --data_name ${data_name} 
         
         i_cam=6
-        n_frame2draw=100
+        n_frame2draw=50
         pickledata_dir=${results3d_dir}'/'$data_name
         python ./visualize_3D.py \
                 --config_path ${config_path}\
