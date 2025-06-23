@@ -1,8 +1,36 @@
 # syntax=docker/dockerfile:experimental
 
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+# FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 
-# MAINTAINER iwata.koki.sd@gmail.com
+# # MAINTAINER iwata.koki.sd@gmail.com
+
+# # これ以降の RUN は bash -lc で動き、conda init／activate が有効になる
+# SHELL ["/bin/bash", "-lc"]
+
+# ENV http_proxy 'http://ufproxy.b.cii.u-fukui.ac.jp:8080'
+# ENV https_proxy 'http://ufproxy.b.cii.u-fukui.ac.jp:8080'
+
+# RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get install -y sudo wget && apt-get install -y git
+
+# # install miniconda env
+# RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+#     sh Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3 && \
+#     rm -r Miniconda3-latest-Linux-x86_64.sh
+
+# ENV PATH /opt/miniconda3/bin:$PATH
+
+# # COPY <env_file_name>.yml .
+
+# RUN pip install --upgrade pip && \
+#     conda update -n base -c defaults conda && \
+#     conda create -n temp python=3.10.12 && \
+#     conda init && \
+#     echo "conda activate temp" >> ~/.bashrc
+
+# WORKDIR /
+
+# syntax=docker/dockerfile:experimental
+FROM nvidia/cuda:11.5.2-cudnn8-devel-ubuntu20.04
 
 # これ以降の RUN は bash -lc で動き、conda init／activate が有効になる
 SHELL ["/bin/bash", "-lc"]
@@ -10,31 +38,54 @@ SHELL ["/bin/bash", "-lc"]
 ENV http_proxy 'http://ufproxy.b.cii.u-fukui.ac.jp:8080'
 ENV https_proxy 'http://ufproxy.b.cii.u-fukui.ac.jp:8080'
 
-RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get install -y sudo wget && apt-get install -y git
+# 1) Create a non-root user and make /app owned by them
+ARG USERNAME=pyuser
+ARG GROUPNAME=pyuser
+ARG UID=1000
+ARG GID=1000
+ARG WORKDIR=/app
 
-# install miniconda env
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    sh Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3 && \
-    rm -r Miniconda3-latest-Linux-x86_64.sh
+RUN groupadd  -g $GID $GROUPNAME && \
+    useradd   -m -s /bin/bash -u $UID -g $GID $USERNAME && \
+    mkdir -p $WORKDIR && \
+    chown -R $UID:$GID $WORKDIR
 
-ENV PATH /opt/miniconda3/bin:$PATH
+# 2) Make sure sudo/wget/git are still available
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      sudo wget git unzip libgl1-mesa-glx libglib2.0-0 && \
+    rm -rf /var/lib/apt/lists/*
 
-# COPY <env_file_name>.yml .
+# (2) sudoers.d ディレクトリを作成
+RUN mkdir -p /etc/sudoers.d
 
-RUN pip install --upgrade pip && \
-    conda update -n base -c defaults conda && \
-    conda create -n temp python=3.10.12 && \
-    conda init && \
+    # 3) sudoers.d にパスワード不要設定を追加
+RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" \
+     > /etc/sudoers.d/$USERNAME && \
+    chmod 0440 /etc/sudoers.d/$USERNAME
+
+    # 3) Install Miniconda & create your Python 3.10 env
+RUN wget -qO ~/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    bash ~/miniconda.sh -b -p /opt/miniconda3 && \
+    rm ~/miniconda.sh
+
+ENV PATH=/opt/miniconda3/bin:$PATH
+
+SHELL ["/bin/bash","-lc"]
+RUN conda update -n base -c defaults conda -y && \
+    conda create -n temp python=3.10.12 -y && \
     echo "conda activate temp" >> ~/.bashrc
+    
+# 4) Switch into your non-root user and /app
+USER $USERNAME
+WORKDIR $WORKDIR
+ENV PYTHONPATH=$WORKDIR
 
-WORKDIR /
+ENV PATH=/opt/miniconda3/envs/temp/bin:/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/pyuser/.local/bin
 
-ENV PATH=/opt/miniconda3/envs/temp/bin:/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-RUN pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118 && \
+RUN pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113 && \
     # Open mmlab
     pip install openmim==0.3.9 && \
-    mim install mmcv-full==1.6.2 && \
+    pip install mmcv-full==1.6.2 -f https://download.openmmlab.com/mmcv/dist/cu115/torch1.11.0/index.html && \
     mim install mmpose==0.29.0 && \
     mim install mmdet==2.26.0 && \ 
     mim install mmtrack==0.14.0 && \ 
@@ -59,36 +110,44 @@ RUN wget -q -O 23506214.zip "https://www.dropbox.com/scl/fo/37q4kv0avrqnio77j2m4
     wget -q -O 23511614.zip "https://www.dropbox.com/scl/fo/johngi3a0ebhvm5b3qcvb/AJ3fER3ga6IK3s2EZa-C3i0?rlkey=gu5xi3czlu7ebsygpyhp0q5vj&st=emmks486" &&\
     wget -q -O weight.zip "https://www.dropbox.com/scl/fo/u8uapca0azuaf4dknxjjx/AOSO5RqGob6NFKvkjSmhlQQ?rlkey=ujd1rhehzlmpoz0yjylgdf8gs&st=2ldcfzgm"
 
-RUN apt-get install unzip &&\
-    mkdir vid &&\
-    unzip 23506214.zip -d vid/dailylife_cj611_20210903_080000.23506214 || echo "23506214.zip failed" &&\
-    unzip 23506226.zip -d vid/dailylife_cj611_20210903_080000.23506226 || echo "23506226.zip failed" &&\
-    unzip 23506236.zip -d vid/dailylife_cj611_20210903_080000.23506236 || echo "23506236.zip failed" &&\
-    unzip 23506237.zip -d vid/dailylife_cj611_20210903_080000.23506237 || echo "23506237.zip failed" &&\
-    unzip 23506239.zip -d vid/dailylife_cj611_20210903_080000.23506239 || echo "23506239.zip failed" &&\
-    unzip 23511607.zip -d vid/dailylife_cj611_20210903_080000.23511607 || echo "23511607.zip failed" &&\
-    unzip 23511613.zip -d vid/dailylife_cj611_20210903_080000.23511613 || echo "23511613.zip failed" &&\
-    unzip 23511614.zip -d vid/dailylife_cj611_20210903_080000.23511614 || echo "23511614.zip failed" &&\
-    unzip weight.zip -d weight || echo "weight failed"
+RUN sudo apt-get install unzip
+RUN sudo mkdir /app/vid && \ 
+    sudo unzip /app/23506214.zip -d /app/vid/dailylife_cj611_20210903_080000.23506214 || echo "23506214.zip failed" &&\
+    sudo unzip /app/23506226.zip -d /app/vid/dailylife_cj611_20210903_080000.23506226 || echo "23506226.zip failed" &&\
+    sudo unzip /app/23506236.zip -d /app/vid/dailylife_cj611_20210903_080000.23506236 || echo "23506236.zip failed" &&\
+    sudo unzip /app/23506237.zip -d /app/vid/dailylife_cj611_20210903_080000.23506237 || echo "23506237.zip failed" &&\
+    sudo unzip /app/23506239.zip -d /app/vid/dailylife_cj611_20210903_080000.23506239 || echo "23506239.zip failed" &&\
+    sudo unzip /app/23511607.zip -d /app/vid/dailylife_cj611_20210903_080000.23511607 || echo "23511607.zip failed" &&\
+    sudo unzip /app/23511613.zip -d /app/vid/dailylife_cj611_20210903_080000.23511613 || echo "23511613.zip failed" &&\
+    sudo unzip /app/23511614.zip -d /app/vid/dailylife_cj611_20210903_080000.23511614 || echo "23511614.zip failed" &&\
+    sudo unzip weight.zip -d weight || echo "weight failed"
 
-# repository and minor or local resources
+# repository and minor or local resources echo "invalidate: $CACHEBUST" && 
 RUN echo "invalidate: $CACHEBUST" && git clone https://github.com/c7h2y/marmo3Dpose.git
 RUN pip install imgstore==0.2.9
-WORKDIR /marmo3Dpose
+WORKDIR /app/marmo3Dpose
 RUN pip install 'src/m_lib'
 
 # Install MMPose
 # RUN conda clean --all
 
 RUN git checkout docker
-RUN cp -r /vid /marmo3Dpose &&\
-    cp -r /weight /marmo3Dpose
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN sudo bash ./proxyset.sh
+RUN cp -r /app/vid /app/marmo3Dpose &&\
+    cp -r /app/weight /app/marmo3Dpose
+RUN sudo apt-get update && \
+    sudo apt-get install -y --no-install-recommends \
       libgl1-mesa-glx \
       libglib2.0-0 && \
-    rm -rf /var/lib/apt/lists/*
+    sudo rm -rf /var/lib/apt/lists/*
 RUN pip install opencv-python
+
+# CUDA のインストール先（シンボリックリンク）
+ENV CUDA_HOME=/usr/local/cuda
+
+# nvcc などのバイナリとライブラリを PATH／LD_LIBRARY_PATH に追加
+ENV PATH=${CUDA_HOME}/bin:${PATH} \
+    LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
 
 RUN bash docker_run_test.sh
 # ENV FORCE_CUDA="0"
