@@ -1,3 +1,5 @@
+https://www.notion.so/dockerfile-2144cc5dbd91802a962cf8ca7fb16de4?source=copy_link
+
 # marmo3Dpose 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11180331.svg)](https://doi.org/10.5281/zenodo.11180331)    
 <img src="./imgs/dataset_pipeline.png" width="815">　  
