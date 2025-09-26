@@ -11,7 +11,7 @@ raw_data_dir='./vid'
 label2d_dir='./results/2d_v0p8_Dark_fix_20'
 vid2dout_dir='./results/video/2d_v0p8_dark_fix_20'
 results3d_dir="./results/3d_v0p8_dark_fix_20"
-vidout_dir='./results/video/3d_v0p8_dark_fix_20'
+vidout_dir='./results/video'
 label2d_output_dir='./results/2d_v0p8_Dark_fix_20'
 
 calib_3d_toml='./calibration_tmpl.toml'    
