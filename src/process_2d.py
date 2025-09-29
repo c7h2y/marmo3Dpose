@@ -3,7 +3,6 @@ import argparse
 import os 
 import platform 
 import glob
-import  process_vid
 import argparse
 import yaml
 import math

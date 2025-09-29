@@ -2,3 +2,7 @@
 output
 results
 data
+# weight/
+*.pth
+*.onnx
+*.ckpt

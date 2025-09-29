@@ -19,25 +19,24 @@ fi
 batchID=${1:-1}
 device_str="cuda:0"
 
-config_path='calib/marmo_cj425m/config.yaml'
-raw_data_dir='vid'
+config_path='data/calib/marmo_cj425m/config.yaml'
+raw_data_dir='data'
 
 label2d_dir='results/2d_v0p8_Dark_fix_20'
-vid2dout_dir='results/video/2d_v0p8_dark_fix_20'
 results3d_dir='results/3d_v0p8_dark_fix_20'
+vid2dout_dir='results/video/2d_v0p8_dark_fix_20'
 vidout_dir='results/video/3d_v0p8_dark_fix_20'
-label2d_output_dir='results/2d_v0p8_Dark_fix_20'
 
-calib_3d_toml='calibration_tmpl.toml'
-config_3d_toml='config_tmpl.toml'
+calib_3d_toml='configs/calibration_tmpl.toml'
+config_3d_toml='configs/config_tmpl.toml'
 
 # 出力系ディレクトリは -p を付けて安全に
 mkdir -p "$label2d_dir" "$results3d_dir" "$vid2dout_dir" "$vidout_dir"
 
-pose_config='model/pose/marmo20/marmo20_tk_hrnet_w48_coco_384x288_dark_v0p10_IDgeneralization.py'
+pose_config='models/pose/marmo20/marmo20_tk_hrnet_w48_coco_384x288_dark_v0p10_IDgeneralization.py'
 pose_checkpoint='weight/marmo20_pose.pth'
-tracking_config='model/track/marmo20/tk_bytetrack_yolox_v0p8.py'
-id_config='model/id/tk_resnet50_8xb32_in1k.py'
+tracking_config='models/track/marmo20/tk_bytetrack_yolox_v0p8.py'
+id_config='models/id/tk_resnet50_8xb32_in1k.py'
 id_checkpoint='weight/id.pth'
 
 fps=24
@@ -45,9 +44,6 @@ t_invt="None"
 n_kp=20
 thr_kp_detection=0.5
 procFrame=-1
-
-# 2D Proc
-flgDo=1
 
 if [ ${batchID} -eq 1 ]; then 
         device_str="cuda:0"
@@ -164,41 +160,40 @@ for session in ${sessions[@]};do
                 --id_config ${id_config} \
                 --id_checkpoint ${id_checkpoint} \
                 --procFrame ${procFrame}
-        flg=0
 
-        for camName in ${camNames[@]};do
-                python ./visualize_2D.py  \
-                        --path_vid ${raw_data_dir}/${data_name}.${camName}/000000.mp4  \
-                        --path_json ${label2d_output_dir}/${data_name}/${data_name}_${camName}_000000.json \
-                        --path_output ${vid2dout_dir}/${data_name}_${camName}_000000.mp4 \
-                        --n_frame_to_save 11000
-        done
+        # for camName in ${camNames[@]};do
+        #         python ./visualize_2D.py  \
+        #                 --path_vid ${raw_data_dir}/${data_name}.${camName}/000000.mp4  \
+        #                 --path_json ${label2d_dir}/${data_name}/${data_name}_${camName}_000000.json \
+        #                 --path_output ${vid2dout_dir}/${data_name}_${camName}_000000.mp4 \
+        #                 --n_frame_to_save 11000
+        # done
 
-        # 3D Proc 
-        t_intv='None'        
-        conda activate multicam2
-        python ./process_3d.py \
-                --config_3d_toml ${config_3d_toml}\
-                --calib_3d_toml ${calib_3d_toml}\
-                --config_path ${config_path}\
-                --fps ${fps}\
-                --t_intv ${t_intv}\
-                --n_kp ${n_kp} \
-                --thr_kp_detection ${thr_kp_detection}\
-                --results3d_dir ${results3d_dir} \
-                --raw_data_dir ${raw_data_dir}\
-                --label2d_dir ${label2d_dir}\
-                --data_name ${data_name} 
+        # # 3D Proc 
+        # t_intv='None'        
+        # conda activate multicam2
+        # python ./process_3d.py \
+        #         --config_3d_toml ${config_3d_toml}\
+        #         --calib_3d_toml ${calib_3d_toml}\
+        #         --config_path ${config_path}\
+        #         --fps ${fps}\
+        #         --t_intv ${t_intv}\
+        #         --n_kp ${n_kp} \
+        #         --thr_kp_detection ${thr_kp_detection}\
+        #         --results3d_dir ${results3d_dir} \
+        #         --raw_data_dir ${raw_data_dir}\
+        #         --label2d_dir ${label2d_dir}\
+        #         --data_name ${data_name} 
         
-        i_cam=6
-        n_frame2draw=11000
-        pickledata_dir=${results3d_dir}'/'$data_name
-        python ./visualize_3D.py \
-                --config_path ${config_path}\
-                --data_name ${data_name} \
-                --raw_data_dir ${raw_data_dir}\
-                --pickledata_dir ${pickledata_dir}\
-                --vidout_dir ${vidout_dir} \
-                --i_cam ${i_cam}\
-                --n_frame2draw ${n_frame2draw}
+        # i_cam=6
+        # n_frame2draw=11000
+        # pickledata_dir=${results3d_dir}'/'$data_name
+        # python ./visualize_3D.py \
+        #         --config_path ${config_path}\
+        #         --data_name ${data_name} \
+        #         --raw_data_dir ${raw_data_dir}\
+        #         --pickledata_dir ${pickledata_dir}\
+        #         --vidout_dir ${vidout_dir} \
+        #         --i_cam ${i_cam}\
+        #         --n_frame2draw ${n_frame2draw}
 done    
