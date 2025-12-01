@@ -3,7 +3,7 @@ set -euo pipefail
 
 # This script configures APT to use your HTTP/HTTPS proxy.
 
-PROXY_URL="http://ufproxy.b.cii.u-fukui.ac.jp:8080"
+PROXY_URL=$1
 APT_CONF_DIR="/etc/apt/apt.conf.d"
 PROXY_CONF="${APT_CONF_DIR}/01proxy"
 
