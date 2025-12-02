@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:experimental
 
-ARG http_proxy='http://ufproxy.b.cii.u-fukui.ac.jp:8080'
-ARG https_proxy='http://ufproxy.b.cii.u-fukui.ac.jp:8080'
+ARG http_proxy
+ARG https_proxy
 
 FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 
