@@ -73,7 +73,7 @@ RUN pip install --upgrade pip && \
     pip install chumpy==0.70 --no-build-isolation && \
     # Open mmlab
     pip install openmim==0.3.9 && \
-    pip install mmcv-full==1.6.2 && \
+    mim install "mmcv-full==1.6.2" -f https://download.openmmlab.com/mmcv/dist/cu115/torch1.11/index.html && \
     mim install mmpose==0.29.0 && \
     mim install mmdet==2.26.0 && \
     mim install mmtrack==0.14.0 && \
@@ -88,38 +88,10 @@ RUN pip install --upgrade pip && \
     pip install matplotlib==3.8.0 && \
     pip install joblib==1.3.2 && \
     pip install imgstore==0.2.9 && \
-    pip install opencv-python && \
+    pip install 'opencv-python==4.6.0.66' && \
     pip install cython wheel setuptools && \
-    pip install 'numpy<2'
+    pip install 'numpy<1.23.0'
     
-    # repository and minor or local resources
-RUN echo "invalidate: $CACHEBUST" && \
-    git clone https://github.com/c7h2y/marmo3Dpose.git -b docker
-
-WORKDIR /app/marmo3Dpose
-RUN pip install --no-build-isolation src/m_lib
-
-# ※ proxy_url は Dockerfile 内で ARG/ENV 定義されていないので、
-#   必要なら ARG proxy_url / ENV proxy_url を追加することをおすすめします
-RUN sudo bash ./proxyset.sh $http_proxy || echo "proxyset.sh skipped (proxy_url not set)"
-
-RUN cp -r /app/vid /app/marmo3Dpose || true && \
-    cp -r /app/weight /app/marmo3Dpose || true
-
-RUN sudo apt-get update && \
-    sudo apt-get install -y --no-install-recommends \
-      libgl1-mesa-glx \
-      libglib2.0-0 && \
-    sudo rm -rf /var/lib/apt/lists/*
-
-
-# CUDA のインストール先（シンボリックリンク）
-ENV CUDA_HOME=/usr/local/cuda
-
-# nvcc などのバイナリとライブラリを PATH／LD_LIBRARY_PATH に追加
-ENV PATH=${CUDA_HOME}/bin:${PATH} \
-    LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
-
 RUN wget -q -O 23506214.zip "https://www.dropbox.com/scl/fo/37q4kv0avrqnio77j2m45/AHBCjGDSomz8lBDKgqZ0TSc?rlkey=x10kl3ybojetw8uk7obhaxld2&st=hzv5pkhe" && \
     wget -q -O 23506226.zip "https://www.dropbox.com/scl/fo/a9p0psdwbaxlepizn5ffa/ALwuW-HiEATMIeLBoRGs5oo?rlkey=yziwod48z7z5vnnuri20zw795&st=0f2pcjus" && \
     wget -q -O 23506236.zip "https://www.dropbox.com/scl/fo/9jmn80tt5ekvyanntwkqx/AOESBYdNhNWShO4tro4LHpE?rlkey=k87nezuq9pxd7krcjxw6fv497&st=249odffl" && \
@@ -143,4 +115,32 @@ RUN sudo mkdir -p /app/vid && \
     sudo unzip /app/23511614.zip -d /app/vid/dailylife_cj611_20210903_080000.23511614 || echo "23511614.zip failed" && \
     sudo unzip weight.zip -d weight || echo "weight failed"
 
-RUN bash docker_run_test.sh
+    # repository and minor or local resources
+    RUN echo "invalidate: $CACHEBUST" && \
+    git clone https://github.com/c7h2y/marmo3Dpose.git -b test/docker
+    
+    WORKDIR /app/marmo3Dpose
+    RUN pip install --no-build-isolation src/m_lib
+
+# ※ proxy_url は Dockerfile 内で ARG/ENV 定義されていないので、
+#   必要なら ARG proxy_url / ENV proxy_url を追加することをおすすめします
+RUN sudo bash ./proxyset.sh $http_proxy || echo "proxyset.sh skipped (proxy_url not set)"
+
+RUN cp -r /app/vid /app/marmo3Dpose || true && \
+    cp -r /app/weight /app/marmo3Dpose || true
+
+RUN sudo apt-get update && \
+    sudo apt-get install -y --no-install-recommends \
+      libgl1-mesa-glx \
+      libglib2.0-0 && \
+    sudo rm -rf /var/lib/apt/lists/*
+
+RUN pip install 'scipy<1.23.0'
+# CUDA のインストール先（シンボリックリンク）
+ENV CUDA_HOME=/usr/local/cuda
+
+# nvcc などのバイナリとライブラリを PATH／LD_LIBRARY_PATH に追加
+ENV PATH=${CUDA_HOME}/bin:${PATH} \
+    LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+
+# RUN bash docker_run_test.sh
