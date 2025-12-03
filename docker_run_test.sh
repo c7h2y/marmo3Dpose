@@ -15,7 +15,7 @@ export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
 device_str="cuda:0"
 
 config_path='./calib/marmo_cj425m/config.yaml'
-raw_data_dir='./vid'
+raw_data_dir='../vid'
 
 label2d_dir='./results/2d_v0p8_Dark_fix_20'
 vid2dout_dir='./results/video/2d_v0p8_dark_fix_20'
@@ -65,7 +65,7 @@ for day in "${days[@]}"; do
         echo "${day}_${hour}"
         session="dailylife_cj611_${day}_${hour}"
         # raw_data_dirs に何か別パスを入れたいならここで設定
-        raw_data_dirs+=("$raw_data_dir")
+        # raw_data_dirs+=("$raw_data_dir")
         sessions+=("$session")
     done
 done
@@ -80,7 +80,7 @@ sescnt=-1
 for session in "${sessions[@]}"; do
     sescnt=$((sescnt + 1))
     data_name="$session"
-    raw_data_dir="${raw_data_dirs[$sescnt]}"
+    # raw_data_dir="${raw_data_dirs[$sescnt]}"
 
     echo "Processing session: $data_name"
     echo "raw_data_dir: $raw_data_dir"

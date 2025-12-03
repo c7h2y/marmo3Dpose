@@ -9,5 +9,5 @@ docker build marmotest:test .
 install guide \
 https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html \
 note the section of "Configuring Docker" \
-this toolkit needs configure runtime
+this toolkit needs to configure the runtime
 
