@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-proxy=$1
-mount=$2
+mount=$1
 IMAGE_NAME="marmo:latest"
 
 echo "=== 1. docker build ==="
