@@ -88,7 +88,7 @@ RUN pip install --upgrade pip && \
     pip install matplotlib==3.8.0 && \
     pip install joblib==1.3.2 && \
     pip install imgstore==0.2.9 && \
-    pip install 'opencv-python==4.6.0.66' && \
+    pip install 'opencv-contrib-python==4.6.0.66' && \
     pip install cython wheel setuptools && \
     pip install 'numpy<1.23.0'
     
@@ -120,11 +120,13 @@ RUN sudo apt-get install -y unzip && sudo rm -rf /var/lib/apt/lists/*
 RUN sudo unzip weight.zip -d weight || echo "weight failed"
 
     # repository and minor or local resources
-    RUN echo "invalidate: $CACHEBUST" && \
-    git clone https://github.com/c7h2y/marmo3Dpose.git -b test/docker
-    
-    WORKDIR /app/marmo3Dpose
-    RUN pip install --no-build-isolation src/m_lib
+RUN echo "invalidate: $CACHEBUST" && \
+    git clone https://github.com/c7h2y/marmo3Dpose.git -b test/docker && \
+    git clone https://github.com/open-mmlab/mmpose.git -b v0.29.0 && \
+    git clone https://github.com/open-mmlab/mmdetection.git -b v2.26.0
+
+WORKDIR /app/marmo3Dpose
+RUN pip install --no-build-isolation src/m_lib
 
 # ※ proxy_url は Dockerfile 内で ARG/ENV 定義されていないので、
 #   必要なら ARG proxy_url / ENV proxy_url を追加することをおすすめします
