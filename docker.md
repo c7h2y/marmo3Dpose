@@ -17,3 +17,4 @@ bash dockerbld.sh
 ```
 bash docker_run_test.sh
 ```
+pls refer the log file that correct this script behavior
