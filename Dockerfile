@@ -121,7 +121,7 @@ RUN sudo unzip weight.zip -d weight || echo "weight failed"
 
     # repository and minor or local resources
 RUN echo "invalidate: $CACHEBUST" && \
-    git clone https://github.com/c7h2y/marmo3Dpose.git -b test/docker && \
+    git clone https://github.com/c7h2y/marmo3Dpose.git -b origin/test/docker && \
     git clone https://github.com/open-mmlab/mmpose.git -b v0.29.0 && \
     git clone https://github.com/open-mmlab/mmdetection.git -b v2.26.0
 RUN mkdir /app/work
