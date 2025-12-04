@@ -15,9 +15,9 @@ export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
 device_str="cuda:0"
 
 config_path='./calib/marmo_cj425m/config.yaml'
-raw_data_dir='../vid'
+raw_data_dir='./vid'
 
-result_dir='../work'
+result_dir='./work'
 label2d_dir="${result_dir}/2d_v0p8_Dark_fix_20"
 vid2dout_dir="${result_dir}/video/2d_v0p8_dark_fix_20"
 results3d_dir="${result_dir}/3d_v0p8_dark_fix_20"

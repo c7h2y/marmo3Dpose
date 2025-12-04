@@ -148,5 +148,7 @@ ENV CUDA_HOME=/usr/local/cuda
 # nvcc などのバイナリとライブラリを PATH／LD_LIBRARY_PATH に追加
 ENV PATH=${CUDA_HOME}/bin:${PATH} \
     LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
-
+RUN mkdir -p weight
+RUN mkdir -p work
+RUN mkdir -p vid
 # RUN bash docker_run_test.sh
