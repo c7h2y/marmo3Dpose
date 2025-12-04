@@ -124,7 +124,7 @@ RUN echo "invalidate: $CACHEBUST" && \
     git clone https://github.com/c7h2y/marmo3Dpose.git -b test/docker && \
     git clone https://github.com/open-mmlab/mmpose.git -b v0.29.0 && \
     git clone https://github.com/open-mmlab/mmdetection.git -b v2.26.0
-
+RUN mkdir /app/work
 WORKDIR /app/marmo3Dpose
 RUN pip install --no-build-isolation src/m_lib
 

@@ -1,4 +1,7 @@
 *.zip
+*.mp4
+*.json
+work_dir/
 data/
 results/
 weight/

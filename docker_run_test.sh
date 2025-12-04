@@ -17,18 +17,19 @@ device_str="cuda:0"
 config_path='./calib/marmo_cj425m/config.yaml'
 raw_data_dir='../vid'
 
-label2d_dir='./results/2d_v0p8_Dark_fix_20'
-vid2dout_dir='./results/video/2d_v0p8_dark_fix_20'
-results3d_dir="./results/3d_v0p8_dark_fix_20"
-vidout_dir='./results/video'
-label2d_output_dir='./results/2d_v0p8_Dark_fix_20'
+resuld_dir='../work'
+label2d_dir="${result_dir}/2d_v0p8_Dark_fix_20"
+vid2dout_dir="${result_dir}/video/2d_v0p8_dark_fix_20"
+results3d_dir="${result_dir}/3d_v0p8_dark_fix_20"
+vidout_dir="${result_dir}/video"
+label2d_output_dir="${result_dir}/2d_v0p8_Dark_fix_20"
 
 calib_3d_toml='./calibration_tmpl.toml'
 config_3d_toml='./config_tmpl.toml'
 
-# ===== ディレクトリ作成（-p で重複 OK に） =====
-mkdir -p './results'
-mkdir -p './results/video'
+# ===== �~C~G�~B��~C��~B��~C~H�~C��~\�~H~P�~H-p �~A��~G~M�~G OK �~A��~I =====
+mkdir -p "$result_dir"
+mkdir -p "${result_dir}/video"
 mkdir -p "$label2d_dir"
 mkdir -p "$results3d_dir"
 mkdir -p "$vid2dout_dir"
@@ -53,8 +54,8 @@ procFrame=100
 flgDo=0
 
 device_str="cuda:0" # hinai-
-days=('20210903')
-hours=('080000')
+days=('20230226')
+hours=('110000')
 
 sessions=()
 raw_data_dirs=()
