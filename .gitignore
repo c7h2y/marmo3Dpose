@@ -1,6 +1,7 @@
 *.zip
 *.mp4
 *.json
+work_dir/
 work_test/
 data/
 results/

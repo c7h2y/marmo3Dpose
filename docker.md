@@ -1,6 +1,6 @@
 # Docker で marmo3Dpose を動かす簡単な手順
 
-このリポジトリでは、**`vid` ディレクトリに動画を入れて、`docker_run_test.sh` のセッション名を変更するだけ**で、2D/3D の推定結果と可視化動画を出力できます。
+このリポジトリでは、**`vid` ディレクトリに動画を入れて、`./work_dir/./work_dir/docker_run_test.sh` のセッション名を変更するだけ**で、2D/3D の推定結果と可視化動画を出力できます。
 
 ---
 
@@ -83,31 +83,37 @@ bash dockerbld_withproxy.sh "$http_proxy"
 
 ## 4. セッション名を動画に合わせて変更する
 
-dockerbld.shを実行するとコンテナ内で `marmo3Dpose` ディレクトリに移動します。
+dockerbld.shを実行するとコンテナ内で `marmo3Dpose` ディレクトリで立ち上がります。
 
 ```bash
 pwd
 /app/marmo3Dpose
 ```
 
-`docker_run_test.sh` を編集して、**処理したい動画に対応するセッション名**に変更します。
-
-```bash
-nano docker_run_test.sh   # 好きなエディタでOK
+そして、このshell scriptを実行するとテストデータで実行できます。
+```
+bash ./work_dir/docker_run_test.sh
 ```
 
-たとえばスクリプト内に
+そのときにdocker内とホスト側のpcでwork_dirがマウントされているので`./work_dir/docker_run_test.sh` を編集すると、docker内のスクリプトも編集されます。そして、このスクリプトを編集して、**処理したい動画に対応するセッション名**に変更します。
 
 ```bash
-session="dailylife_20240101_120000"
+nano ./work_dir/docker_run_test.sh   # 好きなエディタでOK
 ```
 
-のような行があれば、**自分の動画の日時などに合わせて書き換え**ます。
+スクリプト内の58,59行目に
+
+```bash
+days=('20230226')
+hours=('110000')
+```
+
+の行があります。これを、**自分の動画の日時などに合わせて書き換え**ます。
 
 > ポイント：
 >
 > * `session` 変数が、`vid` ディレクトリ内の動画ファイル名やフォルダ構成と対応するようにします。
-> * 複数セッションを処理したい場合は、同じ形式で行を増やしてください。
+> * 複数セッションを処理したい場合は、同じ形式で配列の要素を増やしてください。例:days=('20230226' '20230227')
 
 ---
 
@@ -116,7 +122,7 @@ session="dailylife_20240101_120000"
 セッション名を変更したら、コンテナ内で次を実行します。
 
 ```bash
-bash docker_run_test.sh
+bash ./work/docker_run_test.sh
 ```
 
 これにより、以下の処理が自動で行われます。
@@ -148,7 +154,7 @@ bash docker_run_test.sh
 
 1. 動画を **`-v ホスト側:/app/marmo3Dpose/vid` の「ホスト側」フォルダ**（例：`./marmo3Dpose/vid`）に入れる
 2. `dockerbld.sh`（または `dockerbld_withproxy.sh`）でコンテナを起動
-3. `docker_run_test.sh` の **セッション名を自分の動画に合わせて変更**
-4. `bash docker_run_test.sh` を実行
+3. `./work_dir/docker_run_test.sh` の **セッション名を自分の動画に合わせて変更**
+4. `bash ./work_dir/docker_run_test.sh` を実行
 5. `work_dir`（などマウント先）に結果が出力される
 
