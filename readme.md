@@ -14,11 +14,14 @@
 ```
 #任意の場所で実行；dockermarmoディレクトリとしてクローンされる
 git clone git@github.com:c7h2y/marmo3Dpose.git -b docker.v1.0 dockermarmo
-
+cd dockermarmo
+```
+```
 # もしproxyがあれば
-# export http_proxy=http://proxy.com:port
-# bash dockerbld_withproxy.sh $http_proxy .
-
+export http_proxy=http://proxy.com:port
+bash dockerbld_withproxy.sh $http_proxy .
+```
+```
 # なければこのまま 
 bash dockerbld.sh .
 ```
