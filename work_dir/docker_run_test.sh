@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e  # エラーで止めたい場合はつけておくと便利
 
+# change if you want to process different session videos
+# procFrame=-1 # -1 is indicate to process all frames
+procFrame=100
+days=('20230226')
+hours=('110000')
+
+
 # ===== venv を有効化（Dockerfile で /opt/venv を作った前提） =====
 if [ -d "/opt/venv" ]; then
     # Dockerfile で PATH に /opt/venv/bin を追加しているなら、
@@ -27,7 +34,6 @@ label2d_output_dir="${result_dir}/2d_v0p8_Dark_fix_20"
 calib_3d_toml='./calibration_tmpl.toml'
 config_3d_toml='./config_tmpl.toml'
 
-# ===== �~C~G�~B��~C��~B��~C~H�~C��~\�~H~P�~H-p �~A��~G~M�~G OK �~A��~I =====
 mkdir -p "$result_dir"
 mkdir -p "${result_dir}/video"
 mkdir -p "$label2d_dir"
@@ -47,15 +53,11 @@ t_invt="None"
 n_kp=20
 thr_kp_detection=0.5
 
-# procFrame=1000
-procFrame=100
 
 # 2D Proc
 flgDo=0
 
 device_str="cuda:0" # hinai-
-days=('20230226')
-hours=('110000')
 
 sessions=()
 raw_data_dirs=()
@@ -87,6 +89,7 @@ for session in "${sessions[@]}"; do
     echo "raw_data_dir: $raw_data_dir"
 
     # ===== ここからは venv 上の python をそのまま使用 =====
+    # 2D proc
     python ./process_2d.py \
         --config_path "${config_path}" \
         --data_name "${data_name}" \
@@ -107,7 +110,7 @@ for session in "${sessions[@]}"; do
             --path_vid "${raw_data_dir}/${data_name}.${camName}/000000.mp4"  \
             --path_json "${label2d_output_dir}/${data_name}/${data_name}_${camName}_000000.json" \
             --path_output "${vid2dout_dir}/${data_name}_${camName}_000000.mp4" \
-            --n_frame_to_save 100
+            --n_frame_to_save "${procFrame}"
     done
 
     # 3D Proc
