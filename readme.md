@@ -29,7 +29,7 @@ bash dockerbld.sh .
 ```
 bash work/docker_run_test.sh
 ```
-で実行可能かテストする。エラーが出なければ成功。 \
+で実行可能かテストする。エラーが出ず、work_dirに推定結果や動画が出力されていれば成功。 \
 ここでNvidia系のエラーはcontainer toolkit関係なので１．前提に戻って依存関係を再インストール \
 dockerbldシェルスクリプトを利用することでdockermarmoディレクトリに、 \
 - viddata, weightディレクトリが作成されその中に動画・ネットワーク重みファイルがダウンロードされる
