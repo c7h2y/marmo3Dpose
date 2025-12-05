@@ -1,25 +1,17 @@
-from numpy import False_
-from pandas import date_range
-import reconst_single_step_1 as step1
-import reconst_multi_step2 as step2
-import reconst_multi_step3 as step3
-import reconst_single_step_3 as step4
+import reconst_single_step1 as step1
+import reconst_single_step2 as step2
+import reconst_single_step3 as step3
 import argparse
 import platform
 import os
 def proc(data_name,results3d_dir, config_path,
          raw_data_dir, label2d_dir,fps,t_intv,
-         n_kp,thr_kp_detection,config_3d_toml='./config_tmpl.toml',calib_3d_toml='./calibration_tmpl.toml'):
-    print("Proc:%s" % (data_name))
-    step1.proc(data_name,results3d_dir, raw_data_dir, label2d_dir,fps,t_intv)    
-    # step2.proc(data_name,results3d_dir, config_path, n_kp,thr_kp_detection)
-    step2.proc(data_name,results3d_dir,raw_data_dir,config_path)  
-    save_vid = False
-    save_vid_cam = 1
-    step3.proc(data_name,results3d_dir,raw_data_dir,config_path,save_vid,save_vid_cam)     
+         n_kp,thr_kp_detection,
+         config_3d_toml='./config_tmpl.toml',calib_3d_toml='./calibration_tmpl.toml'):
+    step1.proc(data_name,results3d_dir, raw_data_dir, label2d_dir,fps,t_intv)
+    step2.proc(data_name,results3d_dir, config_path, n_kp,thr_kp_detection)
     redo=False
-    step4.proc(data_name,results3d_dir, config_path, n_kp,
-        redo=redo,config_3d_toml=config_3d_toml,calib_3d_toml=calib_3d_toml)        
+    step3.proc(data_name,results3d_dir, config_path, n_kp,redo=redo,config_3d_toml=config_3d_toml,calib_3d_toml=calib_3d_toml)        
     
 if __name__ == '__main__':
     if 0: 
@@ -27,12 +19,12 @@ if __name__ == '__main__':
         config_path = './calib/marmo/config.yaml'    
 
         # dirs 
-        label2d_dir = './results2d_2color_tr2'
-        results3d_dir='./results3D_2color_tr2'
+        label2d_dir = './results'
+        results3d_dir='./results3D'
         if platform.system()=='Windows':
-            raw_data_dir ='Y:/tkaneko/marmo2hoMotif/foodcomp_collar'
+            raw_data_dir ='Y:/tkaneko/marmo2hoMotif/dailylife'
         else:
-            raw_data_dir= '/mnt/amakusa4/DataOrg/tkaneko/marmo2hoMotif/foodcomp_collar'
+            raw_data_dir= '/mnt/amakusa4/DataOrg/tkaneko/marmo2hoMotif/dailylife'
 
         # params 
         fps = 24
@@ -41,7 +33,7 @@ if __name__ == '__main__':
         thr_kp_detection = 0.5        
 
         # session
-        data_name = 'foodcomp_cj711_cj712_20220606_142445'
+        data_name = 'dailylife_cj425_20211009_110000'
     else:
         parser = argparse.ArgumentParser()    
 
@@ -52,7 +44,7 @@ if __name__ == '__main__':
 
         # params  
         parser.add_argument('--fps',              default=24, type=int,       help='fsp')
-        parser.add_argument('--t_intv',           default='10,300', type=str, help='time interval to analyze, e.g. "10, 300" or "None"')
+        parser.add_argument('--t_intv',           default='10,300', type=str, help='time interval to analyze, e.g. "10, 300"')
         parser.add_argument('--n_kp',             default=18, type=int,       help='number of keypoints')
         parser.add_argument('--thr_kp_detection', default=0.5, type=float,    help='threshold of key-point detection')     
 
@@ -74,6 +66,7 @@ if __name__ == '__main__':
         config_path = args.config_path
         config_3d_toml=args.config_3d_toml
         calib_3d_toml=args.calib_3d_toml
+
         n_kp        = args.n_kp
         thr_kp_detection=args.thr_kp_detection
         if args.t_intv.lower()=='none':
@@ -83,7 +76,7 @@ if __name__ == '__main__':
             t_intv[0] = int(args.t_intv.split(',')[0])
             t_intv[1] = int(args.t_intv.split(',')[1])
     proc(data_name,results3d_dir, config_path, raw_data_dir, label2d_dir,fps,t_intv, n_kp,thr_kp_detection,
-        config_3d_toml=config_3d_toml,calib_3d_toml=calib_3d_toml)
+         config_3d_toml=config_3d_toml,calib_3d_toml=calib_3d_toml)
     # step1.proc(data_name, results3d_dir, raw_data_dir, label2d_dir,fps,t_intv)
     # step2.proc(data_name, results3d_dir, config_path, n_kp,thr_kp_detection)
     # step3.proc(data_name, results3d_dir, config_path, n_kp)

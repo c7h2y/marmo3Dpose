@@ -1,71 +1,172 @@
-# marmo3Dpose 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11180331.svg)](https://doi.org/10.5281/zenodo.11180331)    
-<img src="./imgs/dataset_pipeline.png" width="815">　  
-<img src="./imgs/VideoS1_foodshare.gif" width="400"> &nbsp;&nbsp; <img src="./imgs/VideoS2_foodcomp.gif" width="400">    
+# Docker marmo3Dpose 
 
-## Model details
-This tool is designed to process multiple videos from various viewpoints and generate 3D pose estimations for groups of marmosets. It is especially useful for analyzing the behavior of freely moving marmosets in laboratory environments. The tool can be applied in areas such as biomedical, ethological, applied animal sciences and neuroscience research. The training dataset for this tool comprises over 56,000 annotations, enabling accurate 3D pose estimation of marmosets.
+## 1. 前提
 
-- Analytic pipeline combining multiple CNNs and 3D reconstruction utilities. 
-- Pretrained network optimized for 3D pose estimation of marmoset families, which include a father, a mother, and an infant. The pre-trained model outputs time series data of 3D positions for eyes, nose, shoulders, elbows, wrists, hips, knees, ankles. 
-- The training dataset is available [here](https://doi.org/10.5281/zenodo.11180331). 
+- Ubuntu (shell scriptやwgetが実行可能であれば何でも)
+- NVIDIA GPU 搭載マシン
+- Docker インストール済み
+- NVIDIA Container Toolkit インストール済み（`docker run --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi` などで動作確認）
+- install方法: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+- Configuring Dockerまで実行
+---
 
-### Reference 
-If you use the code or data, please cite us:   
-[Deciphering social traits and pathophysiological conditions from natural behaviors in common marmosets](https://www.biorxiv.org/content/10.1101/2023.10.16.561623v1)   
-by Takaaki Kaneko and Jumpei Matsumoto et al. ([bioRxiv](https://www.biorxiv.org/content/10.1101/2023.10.16.561623v1))
+## 2. Docker Build方法
+```
+#任意の場所で実行；dockermarmoディレクトリとしてクローンされる
+git clone git@github.com:c7h2y/marmo3Dpose.git -b docker.v1.0 dockermarmo
+cd dockermarmo
+```
+```
+# もしproxyがあれば
+export http_proxy=http://proxy.com:port
+bash dockerbld_withproxy.sh $http_proxy .
+```
+```
+# なければこのまま 
+bash dockerbld.sh .
+```
+そして、コンテナが自動的に立ち上がるので、
+```
+bash work/docker_run_test.sh
+```
+で実行可能かテストする。エラーが出なければ成功。 \
+ここでNvidia系のエラーはcontainer toolkit関係なので１．前提に戻って依存関係を再インストール \
+dockerbldシェルスクリプトを利用することでdockermarmoディレクトリに、 \
+- viddata, weightディレクトリが作成されその中に動画・ネットワーク重みファイルがダウンロードされる
+- viddata, weight, work_dirディレクトリがdockerコンテナ内のvid, weight, work ディレクトリにマウントされる
+そのため、動画データの追加や実行スクリプトの変更がコンテナ実行中に変更可能
 
-### Demo 
-Please see [gettingStarted.md](gettingStarted.md)  
+# 補足
+動画ファイルや実行ファイルの変更方法や補足情報を以下に記載します。
 
-### License
-- The tools and data are made available under the Apache 2.0 license.   
+## 1. 動画ファイルの変更
 
-### Acknowledgment 
-Our work builds on the previous significant contributions:
-- [anipose](https://github.com/lambdaloop/anipose)  
-  Karashchuk, P., Rupp, K.L., Dickinson, E.S., Walling-Bell, S., Sanders, E., Azim, E., Brunton, B.W., and Tuthill, J.C. (2021). Anipose: A toolkit for robust markerless 3D pose estimation. Cell Rep. 36, 109730.
-- [mvpose](https://github.com/zju3dv/mvpose)  
-  Dong, J., Jiang, W., Huang, Q., Bao, H., and Zhou, X. (2019). Fast and Robust Multi-Person 3D Pose Estimation from Multiple Views. arXiv:1901.04111.
-- [openmmlab](https://github.com/open-mmlab)  
-  Chen, K., Wang, J., Pang, J., Cao, Y., Xiong, Y., Li, X., Sun, S., Feng, W., Liu, Z., Xu, J., et al. (2019). MMDetection: Open MMLab Detection Toolbox and Benchmark. arXiv:1906.07155.
+このステップでは、「**ホスト側のどのフォルダに動画を置けば、コンテナ内の `/app/marmo3Dpose/vid` から読めるか**」を決めます。
 
-## Intended use
-- This tool is designed to acquire 3D pose estimation data of multiple marmosets for behavioral analysis.
-- While the model itself only provides 3D coordinate information, when combined with appropriate downstream analyses, it can be adapted to a variety of neuroscience experiments including ethological analysis, cognitive function, and phenotypic analysis of disease models.
-- It has also been confirmed to work with macaques and can be adapted for use with other animals, albeit with some adjustments.
+コンテナ側では常に **`/app/marmo3Dpose/vid`** というフォルダを参照します。  
+ホスト側のどのフォルダを `/app/marmo3Dpose/vid` に接続するかは、`dockerbld.sh` / `dockerbld_withproxy.sh` の `-v` オプションで決まります。
 
-### Out-of-scope use cases
-- This tool is optimal for analyzing behaviors that involve whole-body movements, particularly those involving limbs and the head. However, it is not suitable for analyses that require details beyond keypoints, such as subtle facial expressions or piloerection.
+### デフォルト設定の場合
 
-## Factors
-- This tool is not suitable for marmosets under one month old that are always riding on their parents' backs.
-- Accurate individual identification enhances the precision of 3D estimation. When using color tags or similar methods for individual distinction, it is important to note that accuracy might decrease over time due to dirt or wear.
-- It is preferable for each keypoint to be visible in at least three cameras. As the number of subjects or obstacles increases, it may be necessary to increase the number of cameras to maintain accuracy.
+`dockerbld.sh` / `dockerbld_withproxy.sh` は、どちらも次のようになっています。
 
-## Metrics
-- The animal detection and identification in 3D space were 99.3% and 98.8% in precision and recall, respectively. 
-- The geometric error in pose estimation at each keypoint ranged between 4.86 and 17.0 mm.
-- For more details, please refer to the paper.
+```bash
+mount=$1(dockerbld.shの場合) or $2(dockerbld_withproxyの場合)
+sudo docker run --rm -it --gpus all \
+    -v ${mount}/viddata:/app/marmo3Dpose/vid \
+    -v ${mount}/weight:/app/marmo3Dpose/weight \
+    -v ${mount}/work_dir:/app/marmo3Dpose/work \
+    "${IMAGE_NAME}" bash
 
-## Training and Evaluation data
-- The data used for training and evaluation is included in this toolkit.
-- Annotations were made for 56,103 instances across 29 animals, captured in the form of 2D images. Since one image can include multiple animals, there are a total of 23,052 images.
+```
+このときの引数がマウントするディレクトリを指します。 \
+そして、`-v ホスト側:コンテナ側` という書式なので、
+mountで指定されたフォルダをコンテナが参照します。
+* `{mount}/viddata`
+  → **ホスト側で動画を置くフォルダ**
+* `/app/marmo3Dpose/vid`
+  → **コンテナ内で動画を読むフォルダ（固定で OK）**
 
-## Quantitative analyses
-The utility of the 3D pose data cannot be fully assessed by the metrics mentioned above. Therefore, the practical utility of this model has been validated through a series of real biological experiments:
+となります。
 
-- The model was capable of automatically detecting the differential contributions to parenting behaviors between mothers and fathers.
-- By integrating pose estimation with state estimation, the model could uncover the complex and adaptive social cognitive functions of marmosets.
-- The model elucidated the progression of symptoms in a Parkinson's disease model animal over a year, using unsupervised clustering methods, without any prior assumptions.
+したがって、自身の動画ディレクトリを参照する必要があるときは、
 
-## Ethical considerations
-All procedures for the use and experiments of common marmosets were approved by the Animal Welfare and Animal Care Committee of the Center for the Evolutionally Origins of the Human Behavior, Kyoto University, followed by the Guidelines for Care and Use of Nonhuman Primates established by the same institution.
+```text
+    -v ${mount}/viddata:/app/marmo3Dpose/vid \
+->
+    -v ${自身のディレクトリ}:/app/marmo3Dpose/vid \
+```
+のように変更してください。
+その中に、処理したい動画ファイルを置いてください。 \
+例：
+```text
+/${自身のディレクトリ}
+  ├── dailylife_cj611_20230226_110000.23506214
+  └── dailylife_cj611_20230226_110000.23506226
+   ├── 000000.mp4
+   └── ...
+```
 
-## Caveats and recommendations
-The model has various hyperparameters optimized for our specific experimental environment. The training images are also environment-dependent. Consequently, one should not expect the model to function with the same level of accuracy immediately in a new setting. Fine-tuning of the pose estimation, ID recognition, and detection network is essential. Additionally, camera calibration parameters need to be specifically obtained for the new site. For further information, please refer to the paper.
+---
 
+## 2. セッション名を動画に合わせて変更する
 
+dockerbld.shを実行するとコンテナ内で `marmo3Dpose` ディレクトリで立ち上がります。
 
+```bash
+pwd
+/app/marmo3Dpose
+```
 
+そして、このshell scriptを実行するとテストデータで実行できます。
+```
+bash ./work_dir/docker_run_test.sh
+```
 
+そのときにdocker内とホスト側のpcでwork_dirがマウントされているので`./work_dir/docker_run_test.sh` を編集すると、docker内のスクリプトも編集されます。そして、このスクリプトを編集して、**処理したい動画に対応するセッション名**に変更します。
+
+```bash
+nano ./work_dir/docker_run_test.sh   # 好きなエディタでOK
+```
+
+そのときに、スクリプトの最初に、
+
+```bash
+# change if you want to process different session videos
+# procFrame=-1 # -1 is indicate to process all frames
+procFrame=100
+days=('20230226')
+hours=('110000')
+```
+
+の行があります。これを、**自分の動画の日時に合わせて書き換え**、**処理するフレーム数を書き換えます**。
+この行は最終的に、
+```bash
+## 個体番号を適宜変える
+for day in "${days[@]}"; do
+    for hour in "${hours[@]}"; do
+        echo "${day}_${hour}"
+        session="dailylife_cj611_${day}_${hour}"
+        # raw_data_dirs に何か別パスを入れたいならここで設定
+        # raw_data_dirs+=("$raw_data_dir")
+        sessions+=("$session")
+    done
+done
+
+```
+この行によって処理されます。このときに作られた引数がその後の処理に渡されます。 \
+このプロジェクトは8方向からのカメラを用いて処理を行うことが前提とされています。
+
+## 3. 実行
+
+セッション名を変更したら、コンテナ内で次を実行します。
+
+```bash
+bash ./work/docker_run_test.sh
+```
+
+これにより、以下の処理が自動で行われます。
+
+* 2D 推定・トラッキング
+* 2D 可視化動画の生成
+* 3D 再構成
+* 3D 可視化動画の生成
+そのため、2D推定だけ行いたい場合は3D部分をコメントアウトしてください。
+
+---
+
+## 4. 出力結果の確認
+
+コンテナ内では `/app/marmo3Dpose/work` に結果が保存されます。
+ホスト側では、`dockerbld.sh` などでマウントしているディレクトリ（例：`./work_dir`）に出力されます。
+
+主な出力例（ホスト側）：
+
+```text
+./work_dir/
+  ├── 2d_.../          # 2D 推定結果
+  ├── 3d_.../          # 3D 推定結果
+  └── video/           # 2D/3D 可視化動画
+```
+
+---

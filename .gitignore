@@ -1,0 +1,10 @@
+*.zip
+*.mp4
+*.json
+work_dir/*
+work_test/
+data/
+results/
+weight/
+viddata/
+!docker_run_test.sh
