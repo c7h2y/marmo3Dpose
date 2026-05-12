@@ -1,0 +1,11 @@
+results/
+weight/
+*.png
+*.jpg
+*.mp4
+*.pth
+*.json
+__pycache__/
+pose_det_result/
+for_3d_eval/
+src/m_lib/
