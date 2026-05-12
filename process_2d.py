@@ -27,6 +27,7 @@ def proc(data_name,config_path,raw_data_dir,label2d_dir,device_str,
         vidFolder=os.path.join(raw_data_dir,session+'.'+str(camID))        
         # print(vidFolder)
         vidList=glob.glob(vidFolder+'/*.mp4')
+        vidList=sorted(vidList)
         if procFrame>0:
             # nvid=(procFrame//10000)+1            
             nvid=math.ceil(procFrame/10000)
