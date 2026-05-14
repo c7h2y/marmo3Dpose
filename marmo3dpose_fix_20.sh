@@ -1,27 +1,29 @@
 #!/bin/bash
-source /home/administrator/anaconda3/etc/profile.d/conda.sh
+# 使い方: ./marmo3dpose_fix_20.sh [batch_id] [raw_data_dir] [config_path] [results_base]
+CONDA_SH="${CONDA_SH:-/home/administrator/anaconda3/etc/profile.d/conda.sh}"
+source "$CONDA_SH"
 
-batchID=$1
+batchID="${1:-1}"
+raw_data_dir="${2:-../vid}"
+config_path="${3:-./calib/marmo_cj425m/config.yaml}"
+results_base="${4:-./results}"
+
 device_str="cuda:0"
 
-config_path='./calib/marmo_cj425m/config.yaml' 
-raw_data_dir='../vid'
-
-label2d_dir='./results/2d_v0p8_Dark_fix_20'
-vid2dout_dir='./results/video/2d_v0p8_dark_fix_20'
-results3d_dir="./results/3d_v0p8_dark_fix_20"
-vidout_dir='./results/video/3d_v0p8_dark_fix_20'
-label2d_output_dir='./results/2d_v0p8_Dark_fix_20'
-viddir='./results/video'
-calib_3d_toml='./calibration_tmpl.toml'    
+label2d_dir="${results_base}/2d_v0p8_Dark_fix_20"
+vid2dout_dir="${results_base}/video/2d_v0p8_dark_fix_20"
+results3d_dir="${results_base}/3d_v0p8_dark_fix_20"
+vidout_dir="${results_base}/video/3d_v0p8_dark_fix_20"
+label2d_output_dir="${results_base}/2d_v0p8_Dark_fix_20"
+viddir="${results_base}/video"
+calib_3d_toml='./calibration_tmpl.toml'
 config_3d_toml='./config_tmpl.toml'
 
-mkdir $viddir
-mkdir $label2d_dir
-mkdir $results3d_dir
-mkdir $video_dir
-mkdir $vid2dout_dir
-mkdir $vidout_dir
+mkdir -p $viddir
+mkdir -p $label2d_dir
+mkdir -p $results3d_dir
+mkdir -p $vid2dout_dir
+mkdir -p $vidout_dir
 
 pose_config='model/pose/marmo20/marmo20_tk_hrnet_w48_coco_384x288_dark_v0p10_IDgeneralization.py'
 pose_checkpoint='weight/marmo20_pose.pth'
@@ -41,76 +43,76 @@ procFrame=-1
 # 2D Proc
 flgDo=0
 
-if [ ${batchID} -eq 1 ]; then 
+if [ ${batchID} -eq 1 ]; then
         device_str="cuda:0"
-fi 
-if [ ${batchID} -eq 2 ]; then 
+fi
+if [ ${batchID} -eq 2 ]; then
         device_str="cuda:0"
-fi 
-if [ ${batchID} -eq 3 ]; then 
+fi
+if [ ${batchID} -eq 3 ]; then
         device_str="cuda:0"
-fi 
-if [ ${batchID} -eq 4 ]; then 
+fi
+if [ ${batchID} -eq 4 ]; then
         device_str="cuda:0"
-fi 
-if [ ${batchID} -eq 5 ]; then 
+fi
+if [ ${batchID} -eq 5 ]; then
         device_str="cuda:0"
-fi 
-if [ ${batchID} -eq 6 ]; then 
+fi
+if [ ${batchID} -eq 6 ]; then
         device_str="cuda:0"
-fi 
+fi
 
-if [ ${batchID} -eq 7 ]; then 
+if [ ${batchID} -eq 7 ]; then
         device_str="cuda:0"
-fi 
+fi
 
-sessions=() 
+sessions=()
 # raw_data_dir=()
 days=(
-      '20230826' '20230722' '20230701' '20230527' '20230429' '20230325' '20230311' '20230225' '20230218' '20230211' 
-      '20230827' '20230723' '20230702' '20230528' '20230430' '20230326' '20230312' '20230226' '20230219' '20230212'             
+      '20230826' '20230722' '20230701' '20230527' '20230429' '20230325' '20230311' '20230225' '20230218' '20230211'
+      '20230827' '20230723' '20230702' '20230528' '20230430' '20230326' '20230312' '20230226' '20230219' '20230212'
       )
 hours=( '100000' '120000' '140000' '160000'
         '090000' '110000' '130000' '150000')
-if [ ${batchID} -eq 1 ]; then 
-        device_str="cuda:0" # yagido 
+if [ ${batchID} -eq 1 ]; then
+        device_str="cuda:0" # yagido
         days=('20231230' '20231126' '20231001' '20230722' '20230701' '20230311' '20230225' '20230218' '20230211')
-fi 
-if [ ${batchID} -eq 2 ]; then 
-        device_str="cuda:0" # yagido 
+fi
+if [ ${batchID} -eq 2 ]; then
+        device_str="cuda:0" # yagido
         days=('20230226')
-fi 
-if [ ${batchID} -eq 3 ]; then 
+fi
+if [ ${batchID} -eq 3 ]; then
         device_str="cuda:1" # hinai
         days=('20240225' '20240127' '20231029' '20230826' '20230527' '20230429' '20230325' )
-fi 
-if [ ${batchID} -eq 4 ]; then 
+fi
+if [ ${batchID} -eq 4 ]; then
         device_str="cuda:0" # hinai-
         days=('20240224' '20240128' '20231028' '20230827' '20230528' '20230430' '20230326'  )
-fi 
-if [ ${batchID} -eq 5 ]; then 
+fi
+if [ ${batchID} -eq 5 ]; then
         device_str="cuda:0" # hinai-
         days=('20250202')
         hours=('080000' '090000' '100000' '110000' '120000' '130000',
                '140000' '150000' '160000' '170000' '180000')
-fi 
-if [ ${batchID} -eq 6 ]; then 
+fi
+if [ ${batchID} -eq 6 ]; then
         device_str="cuda:0" # hinai-
         days=('20250201')
         hours=('160000' '170000' '180000')
-fi 
+fi
 
-if [ ${batchID} -eq 7 ]; then 
+if [ ${batchID} -eq 7 ]; then
         device_str="cuda:0" # hinai-
         days=('20220514' '20220611' '20220806' '20220903' '20221015' '20221106')
         hours=('130000' '150000' '090000' '110000' '100000')
-fi 
+fi
 
-if [ ${batchID} -eq 7 ]; then 
+if [ ${batchID} -eq 7 ]; then
         device_str="cuda:0" # hinai-
         days=('20230226')
         hours=('110000')
-fi 
+fi
 
 ## 個体番号を適宜変える
 for day in ${days[@]}; do
@@ -123,8 +125,8 @@ for day in ${days[@]}; do
 done
 
 
-# for day in ${days[@]};do 
-#         for hour in ${hours[@]};do 
+# for day in ${days[@]};do
+#         for hour in ${hours[@]};do
 #                 echo ${day}_${hour}
 #                 session='dailylife_cj611_'${day}'_'${hour}
 #                 raw_data_dirs+=('')
@@ -149,7 +151,7 @@ sescnt=-1
 for session in ${sessions[@]};do
         sescnt=`expr $sescnt + 1`
         # raw_data_dir=${raw_data_dirs[$sescnt]}
-        echo $raw_data_dir 
+        echo $raw_data_dir
         data_name=$session
         conda activate openmmlab2
 
@@ -175,8 +177,8 @@ for session in ${sessions[@]};do
         #                 --n_frame_to_save 11000
         # done
 
-        # 3D Proc 
-        t_intv='None'        
+        # 3D Proc
+        t_intv='None'
         conda activate multicam2
          python ./process_3d.py \
                  --config_3d_toml ${config_3d_toml}\

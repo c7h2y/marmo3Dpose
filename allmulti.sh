@@ -1,25 +1,35 @@
 #!/bin/bash
-source /home/administrator/anaconda3/etc/profile.d/conda.sh
+# 使い方: ./allmulti.sh [raw_data_dir] [splits_count] [split_id] [cuda] [config_path] [results_base]
+CONDA_SH="${CONDA_SH:-/home/administrator/anaconda3/etc/profile.d/conda.sh}"
+source "$CONDA_SH"
+
+raw_data_dir="${1:-../vid}"
+splits_count="${2:-2}"
+split_id="${3:-1}"
+cuda="${4:-1}"
+config_path="${5:-./calib/marmo_cj425m/config.yaml}"
+results_base="${6:-./results}"
+
+export CUDA_VISIBLE_DEVICES=$cuda
+printf "CUDA_VISIBLE_DEVICES=%s\n" "$cuda"
 
 device_str="cuda:0"
-config_path='./calib/marmo_cj425m/config.yaml'
-raw_data_dir='../vid'
 
-label2d_dir='./results/2d_v0p8_Dark_fix_20_all'
-vid2dout_dir='./results/video/2d_v0p8_dark_fix_20_all'
-results3d_dir="./results/3d_v0p8_dark_fix_20_all"
-vidout_dir='./results/video/3d_v0p8_dark_fix_20_all'
-label2d_output_dir='./results/2d_v0p8_Dark_fix_20_all'
-viddir='./results/video'
+label2d_dir="${results_base}/2d_v0p8_Dark_fix_20_all"
+vid2dout_dir="${results_base}/video/2d_v0p8_dark_fix_20_all"
+results3d_dir="${results_base}/3d_v0p8_dark_fix_20_all"
+vidout_dir="${results_base}/video/3d_v0p8_dark_fix_20_all"
+label2d_output_dir="${results_base}/2d_v0p8_Dark_fix_20_all"
+viddir="${results_base}/video"
 
 calib_3d_toml='./calibration_tmpl.toml'
 config_3d_toml='./config_tmpl.toml'
 
-mkdir $viddir
-mkdir $label2d_dir
-mkdir $results3d_dir
-mkdir $vid2dout_dir
-mkdir $vidout_dir
+mkdir -p $viddir
+mkdir -p $label2d_dir
+mkdir -p $results3d_dir
+mkdir -p $vid2dout_dir
+mkdir -p $vidout_dir
 
 pose_config='model/pose/marmo20/marmo20_tk_hrnet_w48_coco_384x288_dark_v0p10_IDgeneralization.py'
 pose_checkpoint='weight/marmo20_pose.pth'
@@ -35,20 +45,6 @@ thr_kp_detection=0.5
 
 # procFrame=1000
 procFrame=-1
-
-# 2D Proc
-flgDo=0
-
-sessions=() 
-sessions_raw=()
-
-raw_data_dir="${1:-/path/to/raw}"  # you can also hard-code or export this
-splits_count="${2:-2}"             # number of chunks (N)
-split_id="${3:-1}"                 # which chunk to pick (1…N)
-cuda="${4:-1}"
-shift 4                            # if you want to pass more args to process_sessions.sh
-export CUDA_VISIBLE_DEVICES=$cuda
-printf "CUDA_VISIBLE_DEVICES="$cuda
 
 # 1) Collect and dedupe session names
 sessions_raw=()
@@ -78,7 +74,6 @@ if (( split_id < 1 || split_id > splits_count )); then
 fi
 
 # 2a) CONTIGUOUS-CHUNK method:
-#    each chunk has at most ceil(total/N) entries.
 chunk_size=$(( (total + splits_count - 1) / splits_count ))
 start=$(( (split_id - 1) * chunk_size ))
 selected=( "${sessions[@]:start:chunk_size}" )
@@ -91,7 +86,6 @@ selected=( "${sessions[@]:start:chunk_size}" )
 #     selected+=( "${sessions[idx]}" )
 # done
 
-# 3) do something with the selected sessions
 if (( ${#selected[@]} == 0 )); then
   echo "⚠️  No sessions in chunk $split_id of $splits_count" >&2
   exit 1
@@ -106,8 +100,7 @@ sescnt=-1
 for session in ${selected[@]};do
         printf "\n%s\n", $session
         sescnt=`expr $sescnt + 1`
-        # raw_data_dir=${raw_data_dirs[$sescnt]}
-	echo $raw_data_dir
+        echo $raw_data_dir
         data_name=$session
         conda activate openmmlab2
 
@@ -147,8 +140,8 @@ for session in ${selected[@]};do
                  --results3d_dir ${results3d_dir} \
                  --raw_data_dir ${raw_data_dir}\
                  --label2d_dir ${label2d_dir}\
-                 --data_name ${data_name} 
-        
+                 --data_name ${data_name}
+
         i_cam=6
         n_frame2draw=10000
         pickledata_dir=${results3d_dir}'/'$data_name
@@ -160,4 +153,4 @@ for session in ${selected[@]};do
                 --vidout_dir ${vidout_dir} \
                 --i_cam ${i_cam}\
                 --n_frame2draw ${n_frame2draw}
-done    
+done

@@ -1,28 +1,28 @@
 #!/bin/bash
-source /home/administrator/anaconda3/etc/profile.d/conda.sh
+# 使い方: ./all.sh [raw_data_dir] [config_path] [results_base] [device_str]
+CONDA_SH="${CONDA_SH:-/home/administrator/anaconda3/etc/profile.d/conda.sh}"
+source "$CONDA_SH"
 
-batchID=$1
-device_str="cuda:0"
+raw_data_dir="${1:-../vid}"
+config_path="${2:-./calib/marmo_cj425m/config.yaml}"
+results_base="${3:-./results}"
+device_str="${4:-cuda:0}"
 
-config_path='./calib/marmo_cj425m/config.yaml' 
-raw_data_dir='../vid'
+label2d_dir="${results_base}/2d_v0p8_Dark_fix_20_all"
+vid2dout_dir="${results_base}/video/2d_v0p8_dark_fix_20_all"
+results3d_dir="${results_base}/3d_v0p8_dark_fix_20_all"
+vidout_dir="${results_base}/video/3d_v0p8_dark_fix_20_all"
+label2d_output_dir="${results_base}/2d_v0p8_Dark_fix_20_all"
+viddir="${results_base}/video"
 
-label2d_dir='./results/2d_v0p8_Dark_fix_20_all'
-vid2dout_dir='./results/video/2d_v0p8_dark_fix_20_all'
-results3d_dir="./results/3d_v0p8_dark_fix_20_all"
-vidout_dir='./results/video/3d_v0p8_dark_fix_20_all'
-label2d_output_dir='./results/2d_v0p8_Dark_fix_20_all'
-viddir='./results/video'
-
-calib_3d_toml='./calibration_tmpl.toml'    
+calib_3d_toml='./calibration_tmpl.toml'
 config_3d_toml='./config_tmpl.toml'
 
-mkdir $viddir
-mkdir $label2d_dir
-mkdir $results3d_dir
-mkdir $video_dir
-mkdir $vid2dout_dir
-mkdir $vidout_dir
+mkdir -p $viddir
+mkdir -p $label2d_dir
+mkdir -p $results3d_dir
+mkdir -p $vid2dout_dir
+mkdir -p $vidout_dir
 
 pose_config='model/pose/marmo20/marmo20_tk_hrnet_w48_coco_384x288_dark_v0p10_IDgeneralization.py'
 pose_checkpoint='weight/marmo20_pose.pth'
@@ -42,7 +42,7 @@ procFrame=-1
 # 2D Proc
 flgDo=0
 
-sessions=() 
+sessions=()
 sessions_raw=()
 
 for dir in "$raw_data_dir"/*; do
@@ -76,20 +76,20 @@ printf '%s\n' "${sessions[@]}"
 #    done
 #done
 
-# for day in ${days[@]};do 
-#         for hour in ${hours[@]};do 
+# for day in ${days[@]};do
+#         for hour in ${hours[@]};do
 #                 echo ${day}_${hour}
 #                 session='dailylife_cj611_'${day}'_'${hour}
 #                 raw_data_dirs+=('')
 #                 sessions+=($session)
 #         done
-# done 
+# done
 #for session in ${sessions[@]};do
 #        echo $session
-#done 
+#done
 
 # files_='/mnt/amakusa4/DataOrg/tkaneko/marmo2hoMotif/pogz/pogz1/isolation/p*.23506226'
-# for filepath in ${files_[@]};do     
+# for filepath in ${files_[@]};do
 #         tmp=${filepath##*/}
 #         tmp2=${tmp%%.*}
 #         sessions+=($tmp2)
@@ -103,7 +103,7 @@ for session in ${sessions[@]};do
         printf "%s\n", $session
         sescnt=`expr $sescnt + 1`
         # raw_data_dir=${raw_data_dirs[$sescnt]}
-        echo $raw_data_dir 
+        echo $raw_data_dir
         data_name=$session
         conda activate openmmlab2
 
@@ -143,8 +143,8 @@ for session in ${sessions[@]};do
                  --results3d_dir ${results3d_dir} \
                  --raw_data_dir ${raw_data_dir}\
                  --label2d_dir ${label2d_dir}\
-                 --data_name ${data_name} 
-        
+                 --data_name ${data_name}
+
         i_cam=6
         n_frame2draw=10000
         pickledata_dir=${results3d_dir}'/'$data_name
@@ -156,4 +156,4 @@ for session in ${sessions[@]};do
                 --vidout_dir ${vidout_dir} \
                 --i_cam ${i_cam}\
                 --n_frame2draw ${n_frame2draw}
-done    
+done
