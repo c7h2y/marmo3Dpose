@@ -1,7 +1,5 @@
 #!/bin/bash
 # 使い方: ./marmo3dpose_fix_20.sh [batch_id] [raw_data_dir] [config_path] [results_base]
-CONDA_SH="${CONDA_SH:-/home/administrator/anaconda3/etc/profile.d/conda.sh}"
-source "$CONDA_SH"
 
 batchID="${1:-1}"
 raw_data_dir="${2:-../vid}"
@@ -153,7 +151,6 @@ for session in ${sessions[@]};do
         # raw_data_dir=${raw_data_dirs[$sescnt]}
         echo $raw_data_dir
         data_name=$session
-        conda activate openmmlab2
 
         CUDA_VISIBLE_DEVICES=1 python ./process_2d.py \
                 --config_path ${config_path} \
@@ -179,7 +176,6 @@ for session in ${sessions[@]};do
 
         # 3D Proc
         t_intv='None'
-        conda activate multicam2
          python ./process_3d.py \
                  --config_3d_toml ${config_3d_toml}\
                  --calib_3d_toml ${calib_3d_toml}\

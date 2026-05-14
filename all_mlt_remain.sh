@@ -1,7 +1,5 @@
 #!/bin/bash
 # 使い方: ./all_mlt_remain.sh [raw_data_dir] [splits_count] [split_id] [cuda] [config_path] [results_base]
-CONDA_SH="${CONDA_SH:-/home/administrator/anaconda3/etc/profile.d/conda.sh}"
-source "$CONDA_SH"
 
 raw_data_dir="${1:-../vid}"
 splits_count="${2:-2}"
@@ -105,7 +103,6 @@ for session in ${selected[@]};do
         sescnt=`expr $sescnt + 1`
         echo $raw_data_dir
         data_name=$session
-        conda activate openmmlab2
 
         python ./process_2d.py \
                 --config_path ${config_path} \
@@ -131,7 +128,6 @@ for session in ${selected[@]};do
 
         # 3D Proc
         t_intv='None'
-        conda activate multicam2
         python ./process_3d.py \
                  --config_3d_toml ${config_3d_toml}\
                  --calib_3d_toml ${calib_3d_toml}\
