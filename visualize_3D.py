@@ -186,7 +186,8 @@ def procSingleVideo(config_path, data_name, raw_data_dir,result_dir,vidout_dir,
 
     for i_frame in tqdm(range(n_frame2draw)):
     #for i_frame in tqdm(range(200)):
-        i = frame_num[i_frame]
+        # int() is required: sqlite3 binds np.int64 as a BLOB, so no frame_number matches
+        i = int(frame_num[i_frame])
         img, (frame_number, frame_time) = store.get_image(frame_number=i)
 
         for i_animal in range(n_animal):
