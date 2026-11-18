@@ -1,16 +1,18 @@
-#!/bin/bash 
+#!/bin/bash
+# 使い方: ./run_demo.sh [data_name] [raw_data_dir] [results_base] [config_path]
 
-# dataset name 
-data_name='dl_pogz4_ctrl_cj634cj450_cj886_20221125_120000'
+# dataset name
+data_name="${1:-dl_pogz4_ctrl_cj634cj450_cj886_20221125_120000}"
 
 # path for video data
-raw_data_dir='./videos'
+raw_data_dir="${2:-./videos}"
 
 # output directories
-svid2dout_dir='./results'
-vid3dout_dir='./results'
-label2d_dir='./results'
-results3d_dir='./results'
+results_base="${3:-./results}"
+svid2dout_dir="${results_base}"
+vid3dout_dir="${results_base}"
+label2d_dir="${results_base}"
+results3d_dir="${results_base}"
 
 # gpu device
 device_str='cuda:0'
@@ -23,7 +25,7 @@ skipFrame=0
 procFrame=3000
 
 # 2D analysis parameters
-config_path='./calib/marmo/config.yaml'
+config_path="${4:-./calib/marmo/config.yaml}"
 tracking_config='model/track/tk_bytetrack_demo.py'
 pose_config='model/pose/tk_hrnet_w32_256x256_V0p3.py'
 pose_checkpoint='weight/pose.pth'
@@ -59,7 +61,7 @@ label2d_output_dir=${label2d_dir}
 python ./visualize_2D.py  \
         --path_vid ${raw_data_dir}/${data_name}.${camName}/000000.mp4  \
         --path_json ${label2d_output_dir}/${data_name}/${data_name}_${camName}_000000.json \
-        --path_output ${vid2dout_dir}/${data_name}_${camName}_000000.mp4 \
+        --path_output ${svid2dout_dir}/${data_name}_${camName}_000000.mp4 \
         --n_frame_to_save ${n_frame_to_save}
 
 
@@ -83,9 +85,9 @@ python ./process_3d_multi.py \
         --results3d_dir ${results3d_dir} \
         --raw_data_dir ${raw_data_dir}\
         --label2d_dir ${label2d_dir}\
-        --data_name ${data_name}  
+        --data_name ${data_name}
 
-## Make video for results of 3D 
+## Make video for results of 3D
 #
 pickledata_dir=${results3d_dir}'/'$data_name
 i_cam=6
